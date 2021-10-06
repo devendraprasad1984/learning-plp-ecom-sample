@@ -7,6 +7,7 @@ import colors from "./colors";
 import chars from "./chars";
 import pageTitles from "./pageTitles";
 import navigate from "./navigate";
+import app_enums from "./enums";
 
 export const config = {
     appName: "NuTech PLP Coding Challenge",
@@ -20,6 +21,7 @@ export const config = {
     colors,
     chars,
     pageTitles,
+    app_enums,
     dp2: (num) => parseFloat(num).toFixed(2)
 }
 

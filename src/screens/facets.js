@@ -13,16 +13,20 @@ import Types from "../redux/types";
 const Facets = props => {
     const {title, handleLeftPane} = props
     const [facetsList, setFacetsList] = useState([])
-    const [currentFilter, setCurrentFilter] = useState({gender: [], price: [], color: []})
+    const [currentFilter, setCurrentFilter] = useState({
+        [config.app_enums.gender]: [],
+        [config.app_enums.price]: [],
+        [config.app_enums.color]: []
+    })
     const {data, loading, error} = useAPI(config.endpoints.FACETS)
 
     useEffect(() => {
         if (data === undefined) return
-        setFacetsList(sortByField(data, 'position'))
+        setFacetsList(sortByField(data, config.app_enums.position))
     }, [loading])
 
     const handleCheckChange = (e) => {
-        const keyval = e.target.getAttribute('keyval')
+        const keyval = e.target.getAttribute(config.app_enums.keyval)
         const keyValArr = keyval.split(':')
         const key = keyValArr[0].toLowerCase()
         const val = keyValArr[1].toLowerCase()

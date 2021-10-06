@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {useHistory} from 'react-router-dom'
 import PropTypes from "prop-types";
 import useAPI from "../hooks/useAPI";
@@ -18,13 +18,8 @@ const Products = props => {
     const {data, loading, error} = useAPI(config.endpoints.CATALOG)
     useEffect(() => {
         if (data === undefined) return
-        setProductList(sortByField(data, 'price'))
+        setProductList(sortByField(data, config.app_enums.price))
     }, [loading])
-
-    useEffect(() => {
-        if (filters === null) return
-        console.log('products', filters)
-    }, [filters])
 
     const navigateToProductDetailPage = (id) => {
         const to = `${config.navigate.productDetail}/${id}`
@@ -32,10 +27,17 @@ const Products = props => {
         history.push(to)
     }
 
-    const displayProductList = () => {
+    const displayProductList =useCallback(() => {
         if (productList.length === 0) return
+        const _colorFilter = filters[config.app_enums.color] || []
+        const _genderFilter = filters[config.app_enums.gender] || []
+        const _priceFilter = filters[config.app_enums.price] || []
+        const noFilter=_colorFilter.length === 0 && _genderFilter.length === 0 && _priceFilter.length === 0
+
         return productList.map((prod, index) => {
             const {id, name, imageURL, price, currency, color, gender} = prod
+            let canDisplayItem = (_colorFilter.indexOf(color.toLowerCase()) !== -1 || _genderFilter.indexOf(gender.toLowerCase()) !== -1)
+            if (!canDisplayItem && !noFilter) return null
             return <div key={'prod-item-' + id} className='grid-item click'
                         onClick={() => navigateToProductDetailPage(id)}>
                 <Image className='img-product' src={imageURL}/>
@@ -45,7 +47,7 @@ const Products = props => {
                 </span>
             </div>
         })
-    }
+    },[filters])
 
     if (loading || (error !== undefined && error !== null)) return <NoData/>
     return <div>
@@ -58,9 +60,8 @@ Products.propTypes = {
     title: PropTypes.string.isRequired
 }
 const mapx = (state, ownProps) => {
-    const {filters} = state
     return {
-        filters,
+        filters: state.filters.filters,
     }
 }
 export default React.memo(connect(mapx)(Products))
