@@ -39,7 +39,7 @@ const Products = props => {
         const {_priceFilter} = getFilterObject()
         const priceFilterResults = _priceFilter.map((range) => {
             const hasToRange = range.indexOf('-') !== -1
-            const rangeArr = hasToRange ? range.split('-') : range.split('')
+            const rangeArr = hasToRange ? range.split('-') : range
             let start = 0
             let end = 0
             if (hasToRange) {
@@ -47,7 +47,7 @@ const Products = props => {
                 end = parseFloat(rangeArr[1])
                 return price >= start && price <= end
             } else {
-                start = parseFloat(rangeArr[0])
+                start = parseFloat(rangeArr)
                 return price >= start
             }
         })
