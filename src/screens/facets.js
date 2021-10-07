@@ -10,13 +10,8 @@ import {connect} from 'react-redux'
 import Types from "../redux/types";
 
 const Facets = props => {
-    const {title, handleLeftPane} = props
+    const {title, handleLeftPane, applyFilter, filters, fltr_color, fltr_gender, fltr_price} = props
     const [facetsList, setFacetsList] = useState([])
-    const [currentFilter, setCurrentFilter] = useState({
-        [config.app_enums.gender]: [],
-        [config.app_enums.price]: [],
-        [config.app_enums.color]: []
-    })
     const {data, loading, error} = useAPI(config.endpoints.FACETS)
 
     useEffect(() => {
@@ -30,30 +25,35 @@ const Facets = props => {
         const key = keyValArr[0].toLowerCase()
         const val = keyValArr[1].toLowerCase()
         const checked = e.target.checked
-        let tmp = {...currentFilter}
+        let tmp = {...filters}
         if (checked) {
             tmp[key].push(val)
         } else {
             tmp[key] = tmp[key].filter(it => it !== val)
         }
-        setCurrentFilter({...tmp})
-        props.applyFilter({...tmp})
+        applyFilter({...tmp})
     }
 
-    const displayValueArray = (name, values) => {
+    const displayValueColorGender = (name, values) => {
         if (values.length === 0) return
+        // console.log('set filters', fltr_color, fltr_gender)
+        const isFilterSet = fltr_color.length === 0 && fltr_gender.length === 0
         return values.map((item, index) => {
+            const isColorSet = fltr_color.indexOf(item.toLowerCase()) !== -1
+            const isGenderSet = fltr_gender.indexOf(item.toLowerCase()) !== -1
+            const isCheckBoxToBeSet = isFilterSet===false && (isColorSet === true || isGenderSet === true)
             return <div key={'item-' + index}>
                 <Input type='checkbox' label={item}
-                       keyval={name + ':' + item} onChange={handleCheckChange}
+                       keyval={name + ':' + item} checked={isCheckBoxToBeSet} onChange={handleCheckChange}
                 />
             </div>
         })
     }
-    const displayValueObject = (name, {counts}) => {
+    const displayValuePrice = (name, {counts}) => {
         if (counts.length === 0) return
         let countStringFilter = counts.filter(cnt => typeof cnt === 'string')
         let countIntegerFilter = counts.filter(cnt => typeof cnt !== 'string')
+        const isFilterSet = fltr_price.length === 0
         return countStringFilter.map((item, index) => {
             let endStr = ' - ' + config.chars.doller
             let keyValEndStr = item
@@ -63,10 +63,12 @@ const Facets = props => {
             } else {
                 endStr = '+'
             }
+            const isPriceSet = fltr_price.indexOf(keyValEndStr.toLowerCase()) !== -1
+            const isCheckBoxToBeSet = isFilterSet===false && isPriceSet === true
             return <div key={'price-item-' + index}>
                 <Input type='checkbox'
                        label={config.chars.doller + config.dp2(item) + endStr + ' (' + countIntegerFilter[index] + ')'}
-                       keyval={name + ':' + keyValEndStr} onChange={handleCheckChange}
+                       keyval={name + ':' + keyValEndStr}  checked={isCheckBoxToBeSet} onChange={handleCheckChange}
                 />
             </div>
         })
@@ -78,7 +80,7 @@ const Facets = props => {
             const {facetId, name, values} = facet
             return <div key={'prod-item-' + facetId}>
                 <div className='bg-title pad10'>{name}</div>
-                {Array.isArray(values) ? displayValueArray(name, values) : displayValueObject(name, values)}
+                {Array.isArray(values) ? displayValueColorGender(name, values) : displayValuePrice(name, values)}
             </div>
         })
     }
@@ -100,10 +102,19 @@ Facets.propTypes = {
     handleLeftPane: PropTypes.func
 }
 
-const mapDispatchToProps = dispatch => {
+const mapStateToProps = state => {
+    const filters = state.filters.filters
     return {
-        applyFilter: (payload) => dispatch(Types().setFilterToStore(payload))
+        filters,
+        fltr_color: filters[config.app_enums.color],
+        fltr_gender: filters[config.app_enums.gender],
+        fltr_price: filters[config.app_enums.price]
     }
 }
-export default React.memo(connect(null, mapDispatchToProps)(Facets))
+const mapDispatchToProps = dispatch => {
+    return {
+        applyFilter: (payload) => dispatch(Types().setFilterToStore(payload)),
+    }
+}
+export default React.memo(connect(mapStateToProps, mapDispatchToProps)(Facets))
 
