@@ -10,7 +10,6 @@ import '../css/productDetail.css'
 const ProductDetail = props => {
     const params = useParams()
     const history = useHistory()
-    const {title} = props
     const paramId = params.id || '-1'
 
     const [productItem, setProductItem] = useState(null)

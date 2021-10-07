@@ -14,6 +14,7 @@ const Products = props => {
 
     const history = useHistory()
     const [productList, setProductList] = useState([])
+    const [noFilter, setNoFilter] = useState(true)
 
     const {data, loading, error} = useAPI(config.endpoints.CATALOG)
     useEffect(() => {
@@ -27,17 +28,50 @@ const Products = props => {
         history.push(to)
     }
 
-    const displayProductList =useCallback(() => {
-        if (productList.length === 0) return
+    const getFilterObject = () => {
         const _colorFilter = filters[config.app_enums.color] || []
         const _genderFilter = filters[config.app_enums.gender] || []
         const _priceFilter = filters[config.app_enums.price] || []
-        const noFilter=_colorFilter.length === 0 && _genderFilter.length === 0 && _priceFilter.length === 0
+        return {_colorFilter, _genderFilter, _priceFilter}
+    }
 
+    const checkPriceFilter = (price) => {
+        const {_priceFilter} = getFilterObject()
+        const priceFilterResults = _priceFilter.map((range) => {
+            const hasToRange = range.indexOf('-') !== -1
+            const rangeArr = hasToRange ? range.split('-') : range.split('')
+            let start = 0
+            let end = 0
+            if (hasToRange) {
+                start = parseFloat(rangeArr[0])
+                end = parseFloat(rangeArr[1])
+                return price >= start && price <= end
+            } else {
+                start = parseFloat(rangeArr[0])
+                return price >= start
+            }
+        })
+        return priceFilterResults.indexOf(true) !== -1
+    }
+    useEffect(() => {
+        const {_colorFilter, _genderFilter, _priceFilter} = getFilterObject()
+        const filterFlag = _colorFilter.length === 0 && _genderFilter.length === 0 && _priceFilter.length === 0
+        setNoFilter(filterFlag)
+    }, [filters])
+
+    const displayProductList = useCallback(() => {
+        if (productList.length === 0) return
+        let canDisplayItem = true
         return productList.map((prod, index) => {
             const {id, name, imageURL, price, currency, color, gender} = prod
-            let canDisplayItem = (_colorFilter.indexOf(color.toLowerCase()) !== -1 || _genderFilter.indexOf(gender.toLowerCase()) !== -1)
-            if (!canDisplayItem && !noFilter) return null
+            const {_colorFilter, _genderFilter} = getFilterObject()
+            if (noFilter === false)
+                canDisplayItem = (
+                    _colorFilter.indexOf(color.toLowerCase()) !== -1
+                    || _genderFilter.indexOf(gender.toLowerCase()) !== -1
+                    || checkPriceFilter(price)
+                )
+            if (canDisplayItem === false) return null
             return <div key={'prod-item-' + id} className='grid-item click'
                         onClick={() => navigateToProductDetailPage(id)}>
                 <Image className='img-product' src={imageURL}/>
@@ -47,7 +81,7 @@ const Products = props => {
                 </span>
             </div>
         })
-    },[filters])
+    }, [noFilter, filters, loading, productList])
 
     if (loading || (error !== undefined && error !== null)) return <NoData/>
     return <div>

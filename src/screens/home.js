@@ -7,7 +7,7 @@ import {connect} from "react-redux";
 import Types from "../redux/types";
 
 const Home = props => {
-    const {title,toggleLeftPanel,handleToggle} = props
+    const {toggleLeftPanel,handleToggle} = props
 
 
     return <div>

@@ -7,7 +7,6 @@ import '../css/facets.css'
 import {sortByField} from "../configs/utils";
 import Input from "../components/common/input";
 import {connect} from 'react-redux'
-import Button from "../components/common/button";
 import Types from "../redux/types";
 
 const Facets = props => {
@@ -38,6 +37,7 @@ const Facets = props => {
             tmp[key] = tmp[key].filter(it => it !== val)
         }
         setCurrentFilter({...tmp})
+        props.applyFilter({...tmp})
     }
 
     const displayValueArray = (name, values) => {
@@ -75,19 +75,12 @@ const Facets = props => {
     const displayFacets = () => {
         if (facetsList.length === 0) return
         return facetsList.map((facet, index) => {
-            const {facetId, name, position, values, gap, start, end} = facet
+            const {facetId, name, values} = facet
             return <div key={'prod-item-' + facetId}>
                 <div className='bg-title pad10'>{name}</div>
                 {Array.isArray(values) ? displayValueArray(name, values) : displayValueObject(name, values)}
             </div>
         })
-    }
-
-    const handleFilter = () => {
-        props.applyFilter(currentFilter)
-    }
-    const handleReset = () => {
-        props.applyFilter(null)
     }
 
     if (loading || (error !== undefined && error !== null)) return <NoData/>
@@ -99,10 +92,6 @@ const Facets = props => {
             </span>
         </div>
         <div className='box'>{displayFacets()}</div>
-        <div className='margin-ud'>
-            <Button val='Apply' click={handleFilter} btnClass='green'/>
-            <Button val='Reset' click={handleReset} btnClass='red'/>
-        </div>
     </div>
 }
 

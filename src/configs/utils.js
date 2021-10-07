@@ -16,14 +16,14 @@ export const modal = function (selectorById) {
 
         onopen: function () {
             thisModal.onclick = function (e) {
-                e.preventDefault;
+                e.preventDefault();
                 modalWrapper.classList.add("modal-opened");
             };
         },
 
         onclose: function () {
             modalClose.onclick = function (e) {
-                e.preventDefault;
+                e.preventDefault();
                 modalWrapper.classList.remove("modal-opened");
             };
         },
