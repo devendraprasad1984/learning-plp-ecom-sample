@@ -1,11 +1,27 @@
 @media screen and (max-width: 600px) {
 
+    .container{
+        margin-right: auto;
+        margin-left:  auto;
+        width: 100%;
+        padding-right: 5px;
+        padding-left: 5px;
+        /*overflow-x: hidden;*/
+    }
+
     .row{
         display: inline-grid;
     }
 
     .fixed {
         position: relative;
+    }
+
+    .grid-container {
+        display: grid;
+        /*grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));*/
+        grid-template-columns: auto auto;
+        grid-area: auto;
     }
 
     .leftPanel {
